@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Focus Ledger",
+  "version": "2.1.0",
+  "description": "Tracks productive, idle and waiting-on-AI time for the tab you're actually using.",
+  "minimum_chrome_version": "116",
+  "incognito": "not_allowed",
+  "permissions": ["storage", "tabs", "idle", "scripting", "alarms", "notifications"],
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["shared.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "Focus Ledger",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "options_ui": {
+    "page": "dashboard.html#settings",
+    "open_in_tab": true
+  }
+}

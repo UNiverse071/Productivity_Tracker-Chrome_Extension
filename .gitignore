@@ -1,0 +1,12 @@
+# local tool config
+.claude/
+
+# bridge data lives in ~/.focus-ledger, but never commit a copy by accident
+tasks.json
+rules.json
+token
+
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

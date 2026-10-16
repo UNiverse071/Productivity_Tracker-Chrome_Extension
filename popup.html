@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en" class="locked">
+<head>
+  <meta charset="utf-8">
+  <title>Focus Ledger</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="inbox.css">
+</head>
+<body class="popup">
+  <div class="auth-gate popup-gate" id="authGate" hidden></div>
+
+  <header class="hero-band">
+    <div class="hero-top">
+      <div class="brand small">
+        <img src="icons/icon32.png" alt="" width="22" height="22">
+        <b>Focus Ledger</b>
+      </div>
+      <div class="hero-user" id="heroUser"></div>
+    </div>
+    <div class="hero-nums">
+      <div>
+        <div class="label">Unproductive today</div>
+        <div class="big" id="unproductive">0s</div>
+      </div>
+      <div class="ring" id="ring"></div>
+    </div>
+    <div class="live on-band" id="live"><span class="dot"></span><span id="liveText">Not tracking right now</span></div>
+  </header>
+
+  <div class="pbody">
+    <div class="card compact perm-card" id="permCard" hidden>
+      <div class="card-head"><h2>🛡 Permission requests</h2><span class="muted" id="permSummary"></span></div>
+      <div id="permMini" class="mini-perms"></div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile g-active"><span>Productive</span><b id="tActive">0s</b></div>
+      <div class="tile g-aiWaiting"><span>Waiting on AI</span><b id="tAi">0s</b></div>
+      <div class="tile g-idle"><span>Idle</span><b id="tIdle">0s</b></div>
+    </div>
+
+    <div class="card compact">
+      <div class="card-head"><h2>Today by hour</h2><span class="muted" id="waits"></span></div>
+      <div id="hours"></div>
+    </div>
+
+    <div class="card compact">
+      <div class="card-head"><h2>Top sites</h2></div>
+      <ul class="sites" id="sites"></ul>
+    </div>
+
+    <div class="card compact" id="inboxCard">
+      <div class="card-head"><h2>Agent inbox</h2><span class="muted" id="inboxSummary"></span></div>
+      <div id="inboxMini" class="mini-tasks"></div>
+    </div>
+
+    <div class="card compact">
+      <label class="toggle-row" id="pauseRow"><span><b>Pause my tracking</b></span><input type="checkbox" class="switch" id="paused"></label>
+      <label class="toggle-row" id="idleRow"><span><b>Count idle as unproductive</b><small id="idleNote"></small></span><input type="checkbox" class="switch" id="countIdle"></label>
+      <div class="swatches" id="swatches" title="Theme"></div>
+    </div>
+
+    <button class="primary wide" id="openDash">Open full dashboard →</button>
+  </div>
+
+  <script src="demo-data.js"></script>
+  <script src="shared.js"></script>
+  <script src="charts.js"></script>
+  <script src="auth.js"></script>
+  <script src="agents.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

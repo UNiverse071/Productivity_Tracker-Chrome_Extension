@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en" class="locked">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Focus Ledger Dashboard</title>
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="inbox.css">
+</head>
+<body class="dash">
+  <div class="auth-gate" id="authGate" hidden></div>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="icons/icon48.png" alt="" width="32" height="32">
+      <div><b>Focus Ledger</b><span>Productivity tracker</span></div>
+    </div>
+    <nav id="nav">
+      <a href="#overview" data-view="overview"><span>◔</span>Overview</a>
+      <a href="#hours" data-view="hours"><span>▥</span>By hour</a>
+      <a href="#ai" data-view="ai"><span>✦</span>AI waiting</a>
+      <a href="#sites" data-view="sites"><span>☰</span>Sites</a>
+      <a href="#trends" data-view="trends"><span>↗</span>Trends</a>
+      <div class="nav-label">Agents</div>
+      <a href="#inbox" data-view="inbox"><span>✉</span>Agent inbox<em class="nav-count" id="navCount" hidden></em></a>
+      <a href="#permissions" data-view="permissions"><span>🛡</span>Permission requests<em class="nav-count urgent" id="permCount" hidden></em></a>
+      <a href="#rules" data-view="rules" class="admin-only"><span>⚖</span>Permission rules</a>
+      <div class="nav-label">Account</div>
+      <a href="#users" data-view="users" class="admin-only"><span>👥</span>Users</a>
+      <a href="#settings" data-view="settings"><span>⚙</span>Settings</a>
+      <a href="#about" data-view="about"><span>?</span>About the stats</a>
+    </nav>
+    <div class="side-foot">
+      <div class="live" id="live"><span class="dot"></span><span id="liveText">Not tracking right now</span></div>
+      <div class="user-chip" id="userChip"></div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="demo-banner" id="demoBanner" hidden>Demo mode: showing sample data, because this page isn't running inside the extension.</div>
+
+    <header class="topbar">
+      <div>
+        <h1 id="viewTitle">Overview</h1>
+        <p class="muted" id="viewSub"></p>
+      </div>
+      <div class="topbar-right">
+      <label class="viewing admin-only" id="viewingWrap" title="Admins can view anyone's stats">Viewing <select id="viewingUser"></select></label>
+      <div class="daynav" id="daynav">
+        <button class="ghost" id="prevDay" title="Previous day">‹</button>
+        <input type="date" id="dayPicker">
+        <button class="ghost" id="nextDay" title="Next day">›</button>
+        <button class="ghost" id="todayBtn">Today</button>
+      </div>
+      </div>
+    </header>
+
+    <!-- ===== Overview ===== -->
+    <section class="view" data-view="overview">
+      <div class="kpis" id="kpis"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>Where your time went</h2><span class="muted">Share of tracked time</span></div>
+          <div class="donut-wrap">
+            <div id="donut" class="donut"></div>
+            <ul class="legend big" id="donutLegend"></ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Highlights</h2><span class="muted">For the selected day</span></div>
+          <ul class="highlights" id="highlights"></ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Day timeline</h2><span class="muted">Hover a block to see what you were doing</span></div>
+        <div id="timeline"></div>
+        <ul class="legend inline" data-legend></ul>
+      </div>
+    </section>
+
+    <!-- ===== By hour ===== -->
+    <section class="view" data-view="hours" hidden>
+      <div class="card">
+        <div class="card-head"><h2>Time by hour</h2><span class="muted">Stacked by state</span></div>
+        <div id="hourChart"></div>
+        <ul class="legend inline" data-legend></ul>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>Most productive hour</h2></div>
+          <div class="stat-line" id="bestHour"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Most unproductive hour</h2></div>
+          <div class="stat-line" id="worstHour"></div>
+        </div>
+      </div>
+      <details class="card table-card">
+        <summary>Show as table</summary>
+        <table class="data" id="hourTable"></table>
+      </details>
+    </section>
+
+    <!-- ===== AI waiting ===== -->
+    <section class="view" data-view="ai" hidden>
+      <div class="kpis" id="aiKpis"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h2>How long each wait lasted</h2><span class="muted">Number of waits</span></div>
+          <div id="waitHist"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Waiting time by AI site</h2></div>
+          <div id="aiSites" class="hbars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>AI sites: working vs. waiting</h2><span class="muted">Only time spent on AI chat sites</span></div>
+        <table class="data" id="aiTable"></table>
+      </div>
+    </section>
+
+    <!-- ===== Sites ===== -->
+    <section class="view" data-view="sites" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2>All sites</h2>
+          <div class="seg" id="siteFilter">
+            <button data-f="all" class="on">All</button><button data-f="ai">AI</button><button data-f="web">Other</button>
+          </div>
+        </div>
+        <table class="data" id="siteTable"></table>
+      </div>
+    </section>
+
+    <!-- ===== Trends ===== -->
+    <section class="view" data-view="trends" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2>Daily totals</h2>
+          <div class="seg" id="rangeSel">
+            <button data-r="7" class="on">7 days</button><button data-r="14">14 days</button><button data-r="30">30 days</button>
+          </div>
+        </div>
+        <div id="trendChart"></div>
+        <ul class="legend inline" data-legend></ul>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Productivity score per day</h2><span class="muted">Productive ÷ (productive + unproductive)</span></div>
+        <div id="pctChart"></div>
+      </div>
+      <div class="kpis" id="trendKpis"></div>
+    </section>
+
+    <!-- ===== Agent inbox ===== -->
+    <section class="view" data-view="inbox" hidden>
+      <div class="bridge-bar" id="bridgeBar"></div>
+      <div class="kpis" id="inboxKpis"></div>
+      <div class="inbox">
+        <div class="card inbox-list">
+          <div class="inbox-tools">
+            <input type="search" id="inboxSearch" placeholder="Search tasks, agents, results…">
+            <div class="seg" id="inboxFilter">
+              <button data-f="all" class="on">All</button><button data-f="review">To review</button><button data-f="running">Running</button><button data-f="changes">Changes</button><button data-f="done">Done</button>
+            </div>
+          </div>
+          <div id="taskList" class="task-list"></div>
+        </div>
+        <div class="card inbox-detail" id="taskDetail"></div>
+      </div>
+    </section>
+
+    <!-- ===== Permission requests ===== -->
+    <section class="view" data-view="permissions" hidden>
+      <div class="bridge-bar" id="permBridgeBar"></div>
+      <div class="kpis" id="permKpis"></div>
+      <div class="inbox">
+        <div class="card inbox-list">
+          <div class="inbox-tools">
+            <div class="seg" id="permFilter">
+              <button data-f="pending" class="on">Waiting</button><button data-f="all">All</button><button data-f="approved">Approved</button><button data-f="denied">Denied</button><button data-f="blocked">Blocked</button><button data-f="expired">No answer</button>
+            </div>
+          </div>
+          <div id="permList" class="task-list"></div>
+        </div>
+        <div class="card inbox-detail" id="permDetail"></div>
+      </div>
+    </section>
+
+    <!-- ===== Permission rules (admin) ===== -->
+    <section class="view" data-view="rules" hidden>
+      <div class="card">
+        <div class="card-head"><h2>How rules work</h2><span class="muted" id="rulesStatus"></span></div>
+        <p class="muted rules-intro">Before an agent or sub-agent uses a tool, its call is checked against these rules from top to bottom. The first enabled match decides: <b>Ask me first</b> pauses the agent and sends a request to <a class="link" href="#permissions">Permission requests</a>, <b>Always block</b> stops it, and <b>Always allow</b> lets it through without a prompt. If nothing matches, the agent behaves as usual. Rules are enforced by the bridge, so it must be running.</p>
+        <div class="field-row">
+          <label for="ruleTimeout"><b>Wait for an answer</b><small>Seconds the agent waits for a decision (15–840).</small></label>
+          <input type="number" id="ruleTimeout" min="15" max="840">
+        </div>
+        <div class="field-row">
+          <label for="ruleOnTimeout"><b>If nobody answers</b><small>What happens when the wait runs out.</small></label>
+          <select id="ruleOnTimeout"><option value="deny">Deny it</option><option value="ask">Hand it to the agent's own permission prompt</option></select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Rules</h2><button class="ghost" id="addRule">+ Add rule</button></div>
+        <div id="ruleRows" class="rule-rows"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Try it</h2><span class="muted">See which rule a tool call would hit</span></div>
+        <div class="tester">
+          <select id="testTool"><option>Bash</option><option>PowerShell</option><option>Write</option><option>Edit</option><option>Read</option><option>WebFetch</option><option>WebSearch</option><option>Agent</option></select>
+          <input id="testText" class="mono" value="git push origin main" placeholder="Command, file path, URL…">
+          <label class="check"><input type="checkbox" id="testSub"> from a sub-agent</label>
+        </div>
+        <div id="testResult" class="test-result"></div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="saveRules">Save rules</button>
+        <button class="ghost" id="reloadRules">Discard changes</button>
+      </div>
+    </section>
+
+    <!-- ===== Users (admin) ===== -->
+    <section class="view" data-view="users" hidden>
+      <div class="card">
+        <div class="card-head"><h2>Add a user</h2><span class="muted">They sign in with this username and password</span></div>
+        <form id="addUserForm" class="add-user">
+          <input id="newName" placeholder="Name" required autocomplete="off">
+          <input id="newUsername" placeholder="Username" required autocomplete="off" spellcheck="false">
+          <input id="newPassword" type="password" placeholder="Password (8+ characters)" required autocomplete="new-password">
+          <select id="newRole"><option value="member">Member</option><option value="admin">Admin</option></select>
+          <button class="primary">Add user</button>
+        </form>
+        <p class="muted" id="usersMsg"></p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Accounts</h2><span class="muted" id="usersCount"></span></div>
+        <table class="data users" id="usersTable"></table>
+        <p class="muted small-note">Admins can do everything, including managing users, permission rules, the bridge and tracking settings. Each person's tracked time is stored separately, and only they and admins can see it.</p>
+      </div>
+    </section>
+
+    <!-- ===== Settings ===== -->
+    <section class="view" data-view="settings" hidden>
+      <div class="card">
+        <div class="card-head"><h2>My account</h2><span class="muted" id="myUsername"></span></div>
+        <form id="myAccountForm">
+          <div class="field-row"><label for="myName"><b>Display name</b></label><input id="myName" class="wide-input" required></div>
+          <div class="field-row"><label for="myCurPw"><b>Change password</b><small>Leave empty to keep your current password.</small></label>
+            <span class="pw-pair"><input id="myCurPw" type="password" placeholder="Current" autocomplete="current-password"><input id="myNewPw" type="password" placeholder="New (8+ characters)" autocomplete="new-password"></span></div>
+          <div class="actions"><button class="ghost">Save my account</button><span class="muted" id="myMsg"></span></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Theme</h2><span class="muted">Just for you</span></div>
+        <div class="themes" id="themes"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Tracking</h2></div>
+        <label class="toggle-row"><span><b>Pause tracking</b><small>Nothing is recorded while paused.</small></span><input type="checkbox" class="switch" id="paused"></label>
+        <div class="managed-note member-only">The settings below are managed by your admin.</div>
+        <label class="toggle-row admin-lock"><span><b>Count idle time as unproductive</b><small>Off: only time spent waiting on AI counts as unproductive.</small></span><input type="checkbox" class="switch" id="countGeneralIdle"></label>
+        <div class="field-row admin-lock">
+          <label for="idleThresholdSec"><b>Idle after</b><small>Seconds without typing, clicking, scrolling or moving the mouse.</small></label>
+          <input type="number" id="idleThresholdSec" min="3" max="600">
+        </div>
+        <div class="field-row admin-lock">
+          <label for="maxWaitSec"><b>Max wait per prompt</b><small>Seconds. Caps "Waiting on AI" on sites where the end of a response can't be detected.</small></label>
+          <input type="number" id="maxWaitSec" min="10" max="3600">
+        </div>
+        <div class="field-row admin-lock">
+          <label for="retentionDays"><b>Keep history for</b><small>Days. Older days are deleted automatically.</small></label>
+          <input type="number" id="retentionDays" min="1" max="365">
+        </div>
+      </div>
+
+      <div class="card admin-only">
+        <div class="card-head"><h2>Agent bridge</h2><span class="muted">Connects the Agent inbox to your agents</span></div>
+        <div class="field-row">
+          <label for="bridgeUrl"><b>Bridge address</b><small>Where <code>node bridge/server.mjs</code> is listening. Must be on this computer.</small></label>
+          <input type="text" id="bridgeUrl" class="wide-input" spellcheck="false">
+        </div>
+        <div class="field-row">
+          <label for="bridgeToken"><b>Pairing token</b><small>Printed by the bridge when it starts, and saved in <code>~/.focus-ledger/token</code>.</small></label>
+          <input type="password" id="bridgeToken" class="wide-input" spellcheck="false" autocomplete="off">
+        </div>
+        <label class="toggle-row"><span><b>Notify me when a sub-agent finishes</b><small>A Chrome notification, even when the dashboard is closed.</small></span><input type="checkbox" class="switch" id="notifyAgentTasks"></label>
+        <div class="actions"><button class="ghost" id="testBridge">Test connection</button><span id="bridgeTest" class="muted"></span></div>
+      </div>
+
+      <div class="card admin-only">
+        <div class="card-head"><h2>AI chat sites</h2><span class="muted">One domain per line; subdomains match too</span></div>
+        <textarea id="aiDomains" spellcheck="false"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="save">Save settings</button>
+        <button class="ghost admin-only" id="defaults">Restore defaults</button>
+        <button class="ghost" id="export">Export my data (JSON)</button>
+        <button class="ghost danger" id="clear">Delete my tracked data</button>
+        <span id="saved">Saved ✓</span>
+      </div>
+    </section>
+
+    <!-- ===== About ===== -->
+    <section class="view" data-view="about" hidden>
+      <div class="grid-3">
+        <div class="card about c-active"><h2>Productive</h2><p>You typed, clicked, scrolled or moved the mouse within the idle cutoff (10 s by default).</p></div>
+        <div class="card about c-aiWaiting"><h2>Waiting on AI</h2><p>You're on an AI chat site, you sent a prompt or a reply is still being written, and you aren't typing. Moving the mouse doesn't count as working while you wait.</p></div>
+        <div class="card about c-idle"><h2>Idle</h2><p>No input for longer than the idle cutoff on any other site.</p></div>
+      </div>
+      <div class="card">
+        <h2>The statistics</h2>
+        <dl class="defs">
+          <dt>Unproductive</dt><dd>Waiting on AI plus Idle. Idle can be left out in Settings.</dd>
+          <dt>Productivity score</dt><dd>Productive time ÷ (Productive + Unproductive).</dd>
+          <dt>AI waits</dt><dd>Each unbroken stretch of waiting on an AI counts as one wait. It ends when you type, switch tabs or leave Chrome.</dd>
+          <dt>Average / longest wait</dt><dd>Average and maximum length of those waits.</dd>
+          <dt>Tab switches</dt><dd>How many times you switched tabs or came back to a Chrome window. This is a rough measure of how often you changed context.</dd>
+          <dt>Timeline</dt><dd>Each colored block is one continuous stretch of the same state on the same site.</dd>
+          <dt>Permission requests</dt><dd>Things an agent wanted to do that one of your rules covers. The agent waits until someone with permission approves or denies it, or until the time limit passes.</dd>
+          <dt>Agent inbox</dt><dd>Every task a main agent hands to a sub-agent, grouped under the prompt you gave the main agent. <b>To review</b> = finished but not yet marked done; <b>Changes</b> = you sent a change request; <b>Done</b> = you marked it done.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h2>What counts, and how your data is kept separate</h2>
+        <ul class="bullets">
+          <li>Only the tab you're looking at counts: the visible, focused tab in the focused Chrome window, while your computer is unlocked. Background tabs never add time.</li>
+          <li>Data is stored only on this computer, in this Chrome profile (<code>chrome.storage.local</code>). It is never synced or uploaded.</li>
+          <li>Each user account has its own separate history. Time is recorded only for whoever is signed in, and nothing is recorded while nobody is. Members see only their own stats; admins can view everyone's.</li>
+          <li>Passwords are stored only as salted PBKDF2 hashes.</li>
+          <li>Incognito windows aren't tracked at all.</li>
+          <li>Each day is stored as its own record. Time that crosses an hour or midnight is split, so it never lands in the wrong hour or day.</li>
+          <li>Only site names (for example <code>claude.ai</code>) are stored. Page contents, what you type and full URLs are never recorded.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="demo-data.js"></script>
+  <script src="shared.js"></script>
+  <script src="charts.js"></script>
+  <script src="auth.js"></script>
+  <script src="agents.js"></script>
+  <script src="inbox.js"></script>
+  <script src="permissions.js"></script>
+  <script src="users.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
